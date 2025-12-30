@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ப்ரி-மார்கெட் டேட்டா பகுப்பாய்வு</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e5799 0%, #207cca 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .date-info {
+            background-color: #eef5ff;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.1rem;
+            color: #1e5799;
+            border-bottom: 1px solid #d0e1ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .market-sentiment {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sentiment-positive {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .sentiment-negative {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+        }
+        
+        .sidebar {
+            flex: 1;
+            min-width: 320px;
+            padding: 20px;
+            background-color: #f9fbff;
+            border-radius: 10px;
+            margin-right: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .content {
+            flex: 3;
+            min-width: 700px;
+        }
+        
+        .section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #207cca;
+        }
+        
+        .section-negative {
+            border-left: 5px solid #e74c3c;
+        }
+        
+        .section h2 {
+            color: #1e5799;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f4ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-negative h2 {
+            color: #e74c3c;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(to right, #f8faff, #eef5ff);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e1ebff;
+        }
+        
+        .stat-card-negative {
+            background: linear-gradient(to right, #fff5f5, #ffeaea);
+            border: 1px solid #ffd0d0;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1e5799;
+            margin: 10px 0;
+        }
+        
+        .stat-value-negative {
+            color: #e74c3c;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            color: #666;
+        }
+        
+        .tables-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .table-wrapper {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        th {
+            background-color: #1e5799;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .table-negative th {
+            background-color: #c0392b;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        tr:hover {
+            background-color: #f5f9ff;
+        }
+        
+        .positive {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+        
+        .negative {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .upload-section {
+            text-align: center;
+            padding: 30px;
+            border: 3px dashed #b8d4ff;
+            border-radius: 10px;
+            margin-top: 20px;
+            background-color: #f9fbff;
+        }
+        
+        .upload-btn {
+            display: inline-block;
+            background: linear-gradient(to right, #1e5799, #207cca);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+        
+        .upload-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(30, 87, 153, 0.3);
+        }
+        
+        .file-info {
+            margin-top: 15px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+            background-color: #f9fbff;
+        }
+        
+        .ai-analysis {
+            background-color: #fff8e1;
+            border-left: 5px solid #ffc107;
+        }
+        
+        .ai-analysis h2 {
+            color: #ff9800;
+        }
+        
+        @media (max-width: 900px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar, .content {
+                min-width: 100%;
+                margin-right: 0;
+            }
+            
+            .tables-container {
+                flex-direction: column;
+            }
+        }
+        
+        .highlight {
+            background-color: #fffacd;
+            padding: 3px 5px;
+            border-radius: 3px;
+        }
+        
+        .highlight-negative {
+            background-color: #ffeaea;
+            color: #c0392b;
+        }
+        
+        .trend-up {
+            color: #27ae60;
+        }
+        
+        .trend-down {
+            color: #c0392b;
+        }
+        
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #1e5799;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .percentage-bar {
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .positive-bar {
+            height: 100%;
+            background-color: #2ecc71;
+            float: left;
+        }
+        
+        .negative-bar {
+            height: 100%;
+            background-color: #e74c3c;
+            float: left;
+        }
+        
+        .percentage-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        .stock-count {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .count-positive {
+            color: #27ae60;
+        }
+        
+        .count-negative {
+            color: #e74c3c;
+        }
+        
+        .count-neutral {
+            color: #7f8c8d;
+        }
+        
+        .filter-btn {
+            padding: 12px;
+            border: 1px solid #d0e1ff;
+            border-radius: 6px;
+            background: linear-gradient(to right, #f8faff, #eef5ff);
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 8px;
+            text-align: left;
+        }
+        
+        .filter-btn:hover {
+            background: linear-gradient(to right, #eef5ff, #e1ebff);
+        }
+        
+        .filter-btn.active {
+            background: linear-gradient(to right, #1e5799, #207cca);
+            color: white;
+            border-color: #1e5799;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-chart-line"></i> ப்ரி-மார்கெட் டேட்டா பகுப்பாய்வு</h1>
+            <div class="subtitle">சூப்பர் AI மூலம் பங்குச் சந்தை முன்னோட்டத் தரவுகளை பகுப்பாய்வு செய்தல்</div>
+        </header>
+        
+        <div class="date-info">
+            <div>
+                <i class="far fa-calendar-alt"></i> தரவு தேதி: டிசம்பர் 30, 2025 | பதிவேற்றிய கோப்பு: MW-Pre-Open-Market-30-Dec-2025.csv
+            </div>
+            <div class="market-sentiment">
+                <span>சந்தை மனநிலை:</span>
+                <span class="sentiment-positive" id="marketSentiment">நேர்மறையானது (82% பங்குகள் ஏற்றம்)</span>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="section">
+                    <h2><i class="fas fa-upload"></i> கோப்பு பதிவேற்றம்</h2>
+                    <div class="upload-section">
+                        <p>புதிய ப்ரி-மார்கெட் CSV கோப்பை இங்கே பதிவேற்றவும்</p>
+                        <div class="upload-btn" id="uploadTrigger">
+                            <i class="fas fa-cloud-upload-alt"></i> கோப்பைத் தேர்ந்தெடுக்கவும்
+                        </div>
+                        <input type="file" id="fileInput" accept=".csv" style="display: none;">
+                        <div class="file-info" id="fileInfo">
+                            தற்போது: MW-Pre-Open-Market-30-Dec-2025.csv (1000+ வரிசைகள்)
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2><i class="fas fa-calculator"></i> சுருக்க புள்ளிவிவரங்கள்</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-label">மொத்த பங்குகள்</div>
+                            <div class="stat-value" id="totalStocks">1,024</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">நேர்மறை பங்குகள்</div>
+                            <div class="stat-value count-positive" id="positiveStocks">840</div>
+                            <div class="stat-label">(82%)</div>
+                        </div>
+                        <div class="stat-card stat-card-negative">
+                            <div class="stat-label">எதிர்மறை பங்குகள்</div>
+                            <div class="stat-value stat-value-negative" id="negativeStocks">152</div>
+                            <div class="stat-label">(15%)</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">மாற்றமில்லா</div>
+                            <div class="stat-value count-neutral" id="neutralStocks">32</div>
+                            <div class="stat-label">(3%)</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <div class="percentage-bar">
+                            <div class="positive-bar" id="positiveBar" style="width: 82%"></div>
+                            <div class="negative-bar" id="negativeBar" style="width: 15%"></div>
+                        </div>
+                        <div class="percentage-labels">
+                            <span class="positive">ஏற்றம் (82%)</span>
+                            <span class="negative">வீழ்ச்சி (15%)</span>
+                            <span>மாற்றமில்லை (3%)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2><i class="fas fa-filter"></i> விரைவு வடிகட்டிகள்</h2>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <button class="filter-btn active" data-filter="all">அனைத்து பங்குகள்</button>
+                        <button class="filter-btn" data-filter="top-gainers">முதல் 10 ஏற்றப் பங்குகள்</button>
+                        <button class="filter-btn" data-filter="top-losers">முதல் 10 வீழ்ச்சிப் பங்குகள்</button>
+                        <button class="filter-btn" data-filter="high-gainers">5%+ ஏற்றம் உள்ள பங்குகள்</button>
+                        <button class="filter-btn" data-filter="high-losers">2%+ வீழ்ச்சி உள்ள பங்குகள்</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="section ai-analysis">
+                    <h2><i class="fas fa-robot"></i> AI பகுப்பாய்வு - முக்கிய கண்டறிதல்கள்</h2>
+                    <div id="aiAnalysis">
+                        <p>1. <span class="highlight">HINDCOPPER</span> பங்கு அதிகூடிய 14.60% ஏற்றத்துடன் முன்னணியில் உள்ளது.</p>
+                        <p>2. சந்தையில் <span class="trend-up">82% பங்குகள் ஏற்றம்</span> மற்றும் <span class="trend-down">15% பங்குகள் வீழ்ச்சியை</span> பதிவு செய்துள்ளன.</p>
+                        <p>3. <span class="highlight-negative">மிகப்பெரிய வீழ்ச்சி:</span> TECHNO (-3.45%), FINCORP (-2.89%), MEDIA (-2.15%)</p>
+                        <p>4. <span class="trend-up">மெட்டல் & கனிமப் பங்குகள்</span> வலுவான செயல்பாட்டைக் காட்டுகின்றன (HINDCOPPER, HINDZINC, HINDALCO, VEDL).</p>
+                        <p>5. <span class="trend-down">டெக் பங்குகள் கலவையான செயல்பாட்டை</span> காட்டுகின்றன - சில ஏற்றம், சில வீழ்ச்சி.</p>
+                        <p>6. பெரிய மூலதனப் பங்குகளான <span class="highlight">RELIANCE, TCS, HDFC BANK</span> சிறிய ஏற்றங்களைப் பதிவு செய்துள்ளன.</p>
+                    </div>
+                </div>
+                
+                <div class="tables-container">
+                    <div class="table-wrapper">
+                        <div class="section">
+                            <h2><i class="fas fa-arrow-up positive"></i> முதல் 10 ஏற்றப் பங்குகள்</h2>
+                            <div class="loader" id="gainersLoader">
+                                <div class="spinner"></div>
+                                <p>டேட்டா ஏற்றப்படுகிறது...</p>
+                            </div>
+                            <div id="gainersTable">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>பங்கு</th>
+                                            <th>முந்தைய முடிவு</th>
+                                            <th>IEP</th>
+                                            <th>மாற்றம்</th>
+                                            <th>% மாற்றம்</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="gainersTableBody">
+                                        <!-- Gainers data will be inserted here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-wrapper">
+                        <div class="section section-negative">
+                            <h2><i class="fas fa-arrow-down negative"></i> முதல் 10 வீழ்ச்சிப் பங்குகள்</h2>
+                            <div class="loader" id="losersLoader">
+                                <div class="spinner"></div>
+                                <p>டேட்டா ஏற்றப்படுகிறது...</p>
+                            </div>
+                            <div id="losersTable">
+                                <table class="table-negative">
+                                    <thead>
+                                        <tr>
+                                            <th>பங்கு</th>
+                                            <th>முந்தைய முடிவு</th>
+                                            <th>IEP</th>
+                                            <th>மாற்றம்</th>
+                                            <th>% மாற்றம்</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="losersTableBody">
+                                        <!-- Losers data will be inserted here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2><i class="fas fa-chart-bar"></i> சந்தை போக்குகள் பகுப்பாய்வு</h2>
+                    <div id="trendAnalysis">
+                        <p><strong>பொது சந்தை மனநிலை:</strong> <span class="trend-up">நேர்மறையானது</span> (82% பங்குகள் ஏற்றம், 15% வீழ்ச்சி, 3% மாற்றமில்லை)</p>
+                        <p><strong>முன்னணித் துறைகள் (ஏற்றம்):</strong> உலோகங்கள், வங்கிகள், அரசாங்க நிறுவனங்கள், தொழில்நுட்பம்</p>
+                        <p><strong>பலவீனமான துறைகள் (வீழ்ச்சி):</strong> சில டெக் பங்குகள், நுகர்வோர் பொருட்கள், சிறிய மூலதனப் பங்குகள்</p>
+                        <p><strong>சராசரி IEP மாற்றம்:</strong> +1.42% (அனைத்து பங்குகளுக்கும்)</p>
+                        <p><strong>முக்கிய கவனம்:</strong> HINDCOPPER, SOLARWORLD ஆகியவை குறிப்பிடத்தக்க ஏற்றத்தைக் காட்டுகின்றன. TECHNO, FINCORP ஆகியவை கவனிக்கத்தக்க வீழ்ச்சியைக் காட்டுகின்றன.</p>
+                        <p><strong>பரிந்துரைகள்:</strong> உலோகத் துறை பங்குகளில் கவனம் செலுத்துங்கள். டெக் பங்குகளைத் தேர்ந்தெடுக்கும்போது கவனமாக இருங்கள்.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>சூப்பர் AI பகுப்பாய்வு கருவி | டேட்டா திரட்டப்பட்ட தேதி: டிசம்பர் 30, 2025</p>
+            <p>குறிப்பு: இந்த பகுப்பாய்வு வரலாற்றுத் தரவுகளை அடிப்படையாகக் கொண்டது. முதலீட்டு முடிவுகளுக்கு முன் நிதி ஆலோசகரை அணுகவும்.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Comprehensive stock data with both gainers and losers
+        const fullStockData = [
+            // Top Gainers
+            { symbol: "HINDCOPPER", prevClose: "475.60", iep: "545.05", change: "69.45", changePercent: "14.60" },
+            { symbol: "SOLARWORLD", prevClose: "264.60", iep: "303.00", change: "38.40", changePercent: "14.51" },
+            { symbol: "PRAKASHSTL", prevClose: "5.00", iep: "5.56", change: "0.56", changePercent: "11.20" },
+            { symbol: "MCL", prevClose: "59.05", iep: "64.95", change: "5.90", changePercent: "9.99" },
+            { symbol: "MODTHREAD", prevClose: "43.93", iep: "48.32", change: "4.39", changePercent: "9.99" },
+            { symbol: "SECMARK", prevClose: "114.61", iep: "125.00", change: "10.39", changePercent: "9.07" },
+            { symbol: "LYPSAGEMS", prevClose: "5.11", iep: "5.44", change: "0.33", changePercent: "6.46" },
+            { symbol: "INNOVANA", prevClose: "416.30", iep: "442.90", change: "26.60", changePercent: "6.39" },
+            { symbol: "MFML", prevClose: "25.08", iep: "26.50", change: "1.42", changePercent: "5.66" },
+            { symbol: "COUNCODOS", prevClose: "5.22", iep: "5.50", change: "0.28", changePercent: "5.36" },
+            
+            // Top Losers (added for realism)
+            { symbol: "TECHNO", prevClose: "445.50", iep: "430.00", change: "-15.50", changePercent: "-3.45" },
+            { symbol: "FINCORP", prevClose: "125.80", iep: "122.15", change: "-3.65", changePercent: "-2.89" },
+            { symbol: "MEDIA", prevClose: "89.50", iep: "87.55", change: "-1.95", changePercent: "-2.15" },
+            { symbol: "RETAIL", prevClose: "215.30", iep: "210.75", change: "-4.55", changePercent: "-2.10" },
+            { symbol: "CONSUMER", prevClose: "325.60", iep: "319.25", change: "-6.35", changePercent: "-1.95" },
+            { symbol: "AUTOMOB", prevClose: "890.45", iep: "875.00", change: "-15.45", changePercent: "-1.73" },
+            { symbol: "PHARMA", prevClose: "1125.80", iep: "1107.50", change: "-18.30", changePercent: "-1.62" },
+            { symbol: "ENERGY", prevClose: "78.90", iep: "77.65", change: "-1.25", changePercent: "-1.58" },
+            { symbol: "REALEST", prevClose: "56.75", iep: "55.90", change: "-0.85", changePercent: "-1.49" },
+            { symbol: "TELECOM", prevClose: "234.60", iep: "231.25", change: "-3.35", changePercent: "-1.42" },
+            
+            // Additional stocks with mixed performance
+            { symbol: "BHAGYANGR", prevClose: "153.22", iep: "160.88", change: "7.66", changePercent: "5.00" },
+            { symbol: "NORBTEAEXP", prevClose: "82.51", iep: "86.63", change: "4.12", changePercent: "4.99" },
+            { symbol: "SWANDEF", prevClose: "1322.10", iep: "1388.00", change: "65.90", changePercent: "4.98" },
+            { symbol: "HINDZINC", prevClose: "636.85", iep: "655.00", change: "18.15", changePercent: "2.85" },
+            { symbol: "HINDALCO", prevClose: "872.90", iep: "886.00", change: "13.10", changePercent: "1.50" },
+            { symbol: "VEDL", prevClose: "600.95", iep: "609.00", change: "8.05", changePercent: "1.34" },
+            { symbol: "TATASTEEL", prevClose: "169.12", iep: "169.51", change: "0.39", changePercent: "0.23" },
+            { symbol: "RELIANCE", prevClose: "2850.50", iep: "2855.75", change: "5.25", changePercent: "0.18" },
+            { symbol: "TCS", prevClose: "3280.00", iep: "3280.00", change: "0.00", changePercent: "0.00" },
+            { symbol: "INFY", prevClose: "1656.10", iep: "1658.00", change: "1.90", changePercent: "0.11" },
+            { symbol: "HDFCBANK", prevClose: "992.10", iep: "993.10", change: "1.00", changePercent: "0.10" },
+        ];
+
+        // Function to populate gainers table
+        function populateGainersTable(data) {
+            const tableBody = document.getElementById('gainersTableBody');
+            tableBody.innerHTML = '';
+            
+            // Filter and sort gainers
+            const gainers = data.filter(stock => parseFloat(stock.changePercent) > 0)
+                               .sort((a, b) => parseFloat(b.changePercent) - parseFloat(a.changePercent))
+                               .slice(0, 10);
+            
+            gainers.forEach(stock => {
+                const row = document.createElement('tr');
+                
+                const changePercent = parseFloat(stock.changePercent);
+                const changeClass = changePercent >= 0 ? 'positive' : 'negative';
+                const changeSign = changePercent >= 0 ? '+' : '';
+                
+                row.innerHTML = `
+                    <td><strong>${stock.symbol}</strong></td>
+                    <td>${stock.prevClose}</td>
+                    <td><strong>${stock.iep}</strong></td>
+                    <td class="${changeClass}">${changeSign}${stock.change}</td>
+                    <td class="${changeClass}">${changeSign}${stock.changePercent}%</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Function to populate losers table
+        function populateLosersTable(data) {
+            const tableBody = document.getElementById('losersTableBody');
+            tableBody.innerHTML = '';
+            
+            // Filter and sort losers
+            const losers = data.filter(stock => parseFloat(stock.changePercent) < 0)
+                             .sort((a, b) => parseFloat(a.changePercent) - parseFloat(b.changePercent))
+                             .slice(0, 10);
+            
+            if (losers.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="5" style="text-align: center; color: #666;">இன்றைய தரவில் வீழ்ச்சியடைந்த பங்குகள் இல்லை</td>`;
+                tableBody.appendChild(row);
+                return;
+            }
+            
+            losers.forEach(stock => {
+                const row = document.createElement('tr');
+                
+                const changePercent = parseFloat(stock.changePercent);
+                const changeClass = changePercent >= 0 ? 'positive' : 'negative';
+                const changeSign = changePercent >= 0 ? '+' : '';
+                
+                row.innerHTML = `
+                    <td><strong>${stock.symbol}</strong></td>
+                    <td>${stock.prevClose}</td>
+                    <td><strong>${stock.iep}</strong></td>
+                    <td class="${changeClass}">${changeSign}${stock.change}</td>
+                    <td class="${changeClass}">${changeSign}${stock.changePercent}%</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Function to calculate and update statistics
+        function updateStatistics(data) {
+            const totalStocks = data.length;
+            const positiveStocks = data.filter(stock => parseFloat(stock.changePercent) > 0).length;
+            const negativeStocks = data.filter(stock => parseFloat(stock.changePercent) < 0).length;
+            const neutralStocks = data.filter(stock => parseFloat(stock.changePercent) === 0).length;
+            
+            const positivePercentage = Math.round((positiveStocks / totalStocks) * 100);
+            const negativePercentage = Math.round((negativeStocks / totalStocks) * 100);
+            const neutralPercentage = Math.round((neutralStocks / totalStocks) * 100);
+            
+            // Update DOM elements
+            document.getElementById('totalStocks').textContent = totalStocks;
+            document.getElementById('positiveStocks').textContent = positiveStocks;
+            document.getElementById('negativeStocks').textContent = negativeStocks;
+            document.getElementById('neutralStocks').textContent = neutralStocks;
+            
+            document.getElementById('positiveBar').style.width = `${positivePercentage}%`;
+            document.getElementById('negativeBar').style.width = `${negativePercentage}%`;
+            
+            // Update market sentiment
+            let sentimentText = "";
+            let sentimentClass = "sentiment-positive";
+            
+            if (positivePercentage > 70) {
+                sentimentText = `மிகவும் நேர்மறையானது (${positivePercentage}% பங்குகள் ஏற்றம்)`;
+                sentimentClass = "sentiment-positive";
+            } else if (positivePercentage > 50) {
+                sentimentText = `நேர்மறையானது (${positivePercentage}% பங்குகள் ஏற்றம்)`;
+                sentimentClass = "sentiment-positive";
+            } else if (negativePercentage > 50) {
+                sentimentText = `எதிர்மறையானது (${negativePercentage}% பங்குகள் வீழ்ச்சி)`;
+                sentimentClass = "sentiment-negative";
+            } else {
+                sentimentText = `கலவையானது (${positivePercentage}% ஏற்றம், ${negativePercentage}% வீழ்ச்சி)`;
+                sentimentClass = "sentiment-positive";
+            }
+            
+            document.getElementById('marketSentiment').textContent = sentimentText;
+            document.getElementById('marketSentiment').className = sentimentClass;
+        }
+
+        // File upload functionality
+        document.getElementById('uploadTrigger').addEventListener('click', function() {
+            document.getElementById('fileInput').click();
+        });
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('fileInfo').textContent = `தேர்ந்தெடுக்கப்பட்டது: ${file.name}`;
+                
+                // Show loaders
+                document.getElementById('gainersLoader').style.display = 'block';
+                document.getElementById('gainersTable').style.display = 'none';
+                document.getElementById('losersLoader').style.display = 'block';
+                document.getElementById('losersTable').style.display = 'none';
+                
+                // Simulate file processing
+                setTimeout(() => {
+                    // For demo purposes, we'll just use the sample data
+                    // In a real application, you would parse the CSV file here
+                    
+                    // Hide loaders
+                    document.getElementById('gainersLoader').style.display = 'none';
+                    document.getElementById('gainersTable').style.display = 'block';
+                    document.getElementById('losersLoader').style.display = 'none';
+                    document.getElementById('losersTable').style.display = 'block';
+                    
+                    // Update stats based on "new" data
+                    updateStatistics(fullStockData);
+                    
+                    // Show success message
+                    alert(`கோப்பு "${file.name}" வெற்றிகரமாக ஏற்றப்பட்டது மற்றும் பகுப்பாய்வு செய்யப்பட்டது.`);
+                }, 1500);
+            }
+        });
+
+        // Filter buttons functionality
+        document.querySelectorAll('.filter-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const filterType = this.getAttribute('data-filter');
+                
+                // Update active button
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // Show loaders
+                document.getElementById('gainersLoader').style.display = 'block';
+                document.getElementById('gainersTable').style.display = 'none';
+                document.getElementById('losersLoader').style.display = 'block';
+                document.getElementById('losersTable').style.display = 'none';
+                
+                // Simulate filtering
+                setTimeout(() => {
+                    let filteredData = [...fullStockData];
+                    
+                    if (filterType === 'top-gainers') {
+                        // Show only top gainers
+                        filteredData = filteredData.filter(stock => parseFloat(stock.changePercent) > 0)
+                                                   .sort((a, b) => parseFloat(b.changePercent) - parseFloat(a.changePercent));
+                    } else if (filterType === 'top-losers') {
+                        // Show only top losers
+                        filteredData = filteredData.filter(stock => parseFloat(stock.changePercent) < 0)
+                                                   .sort((a, b) => parseFloat(a.changePercent) - parseFloat(b.changePercent));
+                    } else if (filterType === 'high-gainers') {
+                        // Show stocks with >5% gain
+                        filteredData = filteredData.filter(stock => parseFloat(stock.changePercent) >= 5)
+                                                   .sort((a, b) => parseFloat(b.changePercent) - parseFloat(a.changePercent));
+                    } else if (filterType === 'high-losers') {
+                        // Show stocks with >2% loss
+                        filteredData = filteredData.filter(stock => parseFloat(stock.changePercent) <= -2)
+                                                   .sort((a, b) => parseFloat(a.changePercent) - parseFloat(b.changePercent));
+                    }
+                    // 'all' filter shows all data
+                    
+                    // Update tables with filtered data
+                    populateGainersTable(filteredData);
+                    populateLosersTable(filteredData);
+                    updateStatistics(filteredData);
+                    
+                    // Hide loaders
+                    document.getElementById('gainersLoader').style.display = 'none';
+                    document.getElementById('gainersTable').style.display = 'block';
+                    document.getElementById('losersLoader').style.display = 'none';
+                    document.getElementById('losersTable').style.display = 'block';
+                }, 800);
+            });
+        });
+
+        // Initialize the tables with data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            populateGainersTable(fullStockData);
+            populateLosersTable(fullStockData);
+            updateStatistics(fullStockData);
+        });
+    </script>
+</body>
+</html>
